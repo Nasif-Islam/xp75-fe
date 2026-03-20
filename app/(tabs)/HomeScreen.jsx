@@ -13,20 +13,25 @@ import {
   View,
 } from "react-native";
 import DayProgress from "../components/DayProgress";
+import LoadingScreen from "../components/LoadingScreen";
 import LoginModal from "../components/LoginModal";
+import ReflectionAccordion from "../components/ReflectionAccordion";
+import SubmitSuccessModal from "../components/SubmitSuccessModal";
 import TaskCard from "../components/TaskCard";
 import { useUserContext } from "../context/UserContext";
 import {
   ACCENT,
+  ACCENT_SOFT,
   BG,
+  CARD,
   DANGER,
   MUTED,
   SUCCESS,
+  SUCCESS_SOFT,
   baseCard,
   fontSizes,
   fontWeights,
 } from "../styles/global";
-
 const BASE_URL = "https://xp75-be.onrender.com";
 const TOTAL_DAYS = 75;
 
@@ -73,7 +78,7 @@ const checkedFromDay = (day) => ({
   water: day.water_consumed,
   reading: day.pages_read,
   reflection: true,
-  progressPhoto: !!day.progress_pic,
+  progressPhoto: !!day.progress_pic_key,
 });
 
 export default function HomeScreen() {
@@ -83,6 +88,10 @@ export default function HomeScreen() {
   const [loginVisible, setLoginVisible] = useState(false);
   const [dayNumber, setDayNumber] = useState(1);
   const [apiStatus, setApiStatus] = useState("checking...");
+  const [reflectionVisible, setReflectionVisible] = useState(false);
+  const [reflectionData, setReflectionData] = useState(null);
+  const [showAnimation, setShowAnimation] = useState(false);
+  const [loadingDone, setLoadingDone] = useState(false);
 
   const { user, accessToken, login, logout } = useUserContext();
 
@@ -91,10 +100,15 @@ export default function HomeScreen() {
 
   // For testing API status (temporary)
   useEffect(() => {
-    fetch(`${BASE_URL}/api/version`)
+    const minDelay = new Promise((resolve) => setTimeout(resolve, 4700));
+    const apiCheck = fetch(`${BASE_URL}/api/version`)
       .then((res) => res.json())
-      .then(() => setApiStatus("API connected ✓"))
-      .catch(() => setApiStatus("API unreachable ✗"));
+      .then(() => "connected")
+      .catch(() => "unreachable");
+
+    Promise.all([minDelay, apiCheck]).then(([, status]) => {
+      setApiStatus(status === "connected" ? "API connected ✓" : "API unreachable ✗");
+    });
   }, []);
 
   const saveUserDayState = async (userId, newChecked, newPhoto, newSubmitted) => {
@@ -125,62 +139,44 @@ export default function HomeScreen() {
     async (userId, token) => {
       const days = await loadDayStateFromDB(token);
 
-      if (days !== null) {
-        if (days.length === 0) {
-          setDayNumber(1);
-          setChecked(freshChecked());
-          setPhoto(null);
-          setSubmitted(false);
-          return;
-        }
-
-        const lastDay = days[days.length - 1];
-        const lastDayDate = lastDay.created_at ? lastDay.created_at.split("T")[0] : null;
-        const today = todayString();
-        const yesterday = new Date(Date.now() - 86400000).toISOString().split("T")[0];
-        const lastDayNumber = lastDay.day_number;
-
-        if (lastDayDate === today) {
-          setDayNumber(lastDayNumber);
-          setChecked(checkedFromDay(lastDay));
-          setSubmitted(true);
-          return;
-        }
-
-        if (lastDayDate === yesterday || lastDayNumber >= TOTAL_DAYS) {
-          const nextDay = Math.min(lastDayNumber + 1, TOTAL_DAYS);
-          setDayNumber(nextDay);
-          setChecked(freshChecked());
-          setPhoto(null);
-          setSubmitted(false);
-          return;
-        }
-
+      if (days.length === 0) {
         setDayNumber(1);
         setChecked(freshChecked());
         setPhoto(null);
         setSubmitted(false);
+        setReflectionData(null);
         return;
       }
 
-      try {
-        const stored = await AsyncStorage.getItem(storageKey(userId));
-        if (stored) {
-          const { checked: c, photo: p, submitted: s } = JSON.parse(stored);
-          setChecked(c ?? freshChecked());
-          setPhoto(p ?? null);
-          setSubmitted(s ?? false);
-        } else {
-          setChecked(freshChecked());
-          setPhoto(null);
-          setSubmitted(false);
-        }
-      } catch (err) {
-        console.warn("AsyncStorage read failed:", err);
+      const lastDay = days[days.length - 1];
+      const today = todayString();
+      const yesterday = new Date(Date.now() - 86400000).toISOString().split("T")[0];
+      const lastDayDate = lastDay.created_at ? lastDay.created_at.split("T")[0] : null;
+      const lastDayNumber = lastDay.day_number;
+
+      if (lastDayDate === today || (!lastDayDate && days.length > 0)) {
+        setDayNumber(lastDayNumber);
+        setChecked(checkedFromDay(lastDay));
+        setSubmitted(true);
+        return;
+      }
+
+      if (lastDayDate === yesterday || lastDayNumber >= TOTAL_DAYS) {
+        const nextDay = Math.min(lastDayNumber + 1, TOTAL_DAYS);
+        setDayNumber(nextDay);
         setChecked(freshChecked());
         setPhoto(null);
         setSubmitted(false);
+        setReflectionData(null);
+        return;
       }
+
+      setDayNumber(1);
+      setChecked(freshChecked());
+      setPhoto(null);
+      setSubmitted(false);
+      setReflectionData(null);
+      return;
     },
     [loadDayStateFromDB],
   );
@@ -237,10 +233,25 @@ export default function HomeScreen() {
     setPhoto(null);
     setSubmitted(false);
     setDayNumber(1);
+    setReflectionData(null);
+  };
+
+  const handleReflectionSave = (data) => {
+    setReflectionData(data);
+    setChecked((prev) => {
+      const next = { ...prev, reflection: true };
+      if (user) saveUserDayState(user.id, next, photo, false);
+      return next;
+    });
   };
 
   const toggle = (key) => {
     if (submitted || !user) return;
+    if (key === "reflection") {
+      setReflectionVisible(true);
+      return;
+    }
+    if (key === "progressPhoto") return;
     setChecked((prev) => {
       const next = { ...prev, [key]: !prev[key] };
       saveUserDayState(user.id, next, photo, false);
@@ -263,29 +274,44 @@ export default function HomeScreen() {
     if (!result.canceled) {
       const newPhoto = result.assets[0].uri;
       setPhoto(newPhoto);
-      saveUserDayState(user.id, checked, newPhoto, false);
+      setChecked((prev) => {
+        const next = { ...prev, progressPhoto: true };
+        saveUserDayState(user.id, next, newPhoto, false);
+        return next;
+      });
     }
   };
 
   const handleSubmit = async () => {
-    const payload = {
-      day_number: dayNumber,
-      diet_adhered: checked.diet,
-      outdoor_workout_completed: checked.outdoorWorkout,
-      indoor_workout_completed: checked.indoorWorkout,
-      water_consumed: checked.water,
-      pages_read: checked.reading,
-      ...DUMMY_REFLECTION,
-    };
+    if (!reflectionData) {
+      Alert.alert("Reflection required", "Please complete your reflection before submitting.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("day_number", String(dayNumber));
+    formData.append("diet_adhered", String(checked.diet));
+    formData.append("outdoor_workout_completed", String(checked.outdoorWorkout));
+    formData.append("indoor_workout_completed", String(checked.indoorWorkout));
+    formData.append("water_consumed", String(checked.water));
+    formData.append("pages_read", String(checked.reading));
+    formData.append("mood_rating", String(reflectionData.mood_rating));
+    formData.append("achievements", reflectionData.achievements);
+    formData.append("challenges", reflectionData.challenges);
+    formData.append("next_day_focus", reflectionData.next_day_focus);
+    if (photo) {
+      formData.append("progress_pic", {
+        uri: photo,
+        name: "progress-pic.jpg",
+        type: "image/jpeg",
+      });
+    }
 
     try {
       const res = await fetch(`${BASE_URL}/api/days`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify(payload),
+        headers: { Authorization: `Bearer ${accessToken}` },
+        body: formData,
       });
 
       const data = await res.json();
@@ -297,6 +323,7 @@ export default function HomeScreen() {
       }
 
       setSubmitted(true);
+      setShowAnimation(true);
       await saveUserDayState(user.id, checked, photo, true);
     } catch (err) {
       console.warn("Submit error:", err);
@@ -307,9 +334,11 @@ export default function HomeScreen() {
   const completedCount = Object.values(checked).filter(Boolean).length;
   const allDone = completedCount === TASKS.length;
   const isLoggedIn = !!user;
+  const isLoading = apiStatus === "checking...";
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: BG }}>
+      {!loadingDone && <LoadingScreen onReady={isLoading ? null : () => setLoadingDone(true)} />}
       <LoginModal
         visible={loginVisible}
         onClose={() => setLoginVisible(false)}
@@ -317,6 +346,19 @@ export default function HomeScreen() {
         user={user}
         accessToken={accessToken}
         onLogout={handleLogout}
+      />
+
+      <ReflectionAccordion
+        visible={reflectionVisible}
+        onClose={() => setReflectionVisible(false)}
+        onSave={handleReflectionSave}
+        existingData={reflectionData}
+      />
+
+      <SubmitSuccessModal
+        visible={showAnimation}
+        onClose={() => setShowAnimation(false)}
+        dayNumber={dayNumber}
       />
 
       <View style={styles.header}>
@@ -360,6 +402,7 @@ export default function HomeScreen() {
             photo={photo}
             toggle={toggle}
             pickImage={pickImage}
+            onOpenReflection={() => setReflectionVisible(true)}
           />
         ))}
 
@@ -393,7 +436,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 20,
-    paddingTop: 16,
+    paddingTop: 52,
     paddingBottom: 12,
   },
   loginBtn: {
@@ -410,10 +453,10 @@ const styles = StyleSheet.create({
     height: 28,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: "#FFF",
+    borderColor: CARD,
   },
   loginBtnText: {
-    color: "#FFF",
+    color: CARD,
     fontSize: fontSizes.base,
     fontWeight: fontWeights.semibold,
     letterSpacing: 0.4,
@@ -430,7 +473,7 @@ const styles = StyleSheet.create({
   },
   loginBanner: {
     ...baseCard.card,
-    backgroundColor: "#EEF1FE",
+    backgroundColor: ACCENT_SOFT,
     alignItems: "center",
     paddingVertical: 14,
   },
@@ -450,13 +493,13 @@ const styles = StyleSheet.create({
     backgroundColor: MUTED,
   },
   submitBtnText: {
-    color: "#FFF",
+    color: CARD,
     fontWeight: fontWeights.bold,
     fontSize: fontSizes.md,
     letterSpacing: 0.3,
   },
   submittedBanner: {
-    backgroundColor: "#DCFCE7",
+    backgroundColor: SUCCESS_SOFT,
     borderRadius: 12,
     paddingVertical: 14,
     alignItems: "center",

@@ -1,27 +1,21 @@
-import { View } from "react-native";
+import { Image, View } from "react-native";
 import { Card, Text, useTheme } from "react-native-paper";
 
 const BADGES = [
   {
     type: "bronze",
-    emoji: "🥉",
-    label: "Bronze",
+    image: require("../assets/bronze-badge-image.jpeg"),
     day: 25,
-    color: "#CD7F32",
   },
   {
     type: "silver",
-    emoji: "🥈",
-    label: "Silver",
+    image: require("../assets/silver-badge-image.jpeg"),
     day: 50,
-    color: "#C0C0C0",
   },
   {
     type: "gold",
-    emoji: "🥇",
-    label: "Gold",
+    image: require("../assets/gold-badge-image.jpeg"),
     day: 75,
-    color: "#FFD700",
   },
 ];
 
@@ -38,11 +32,14 @@ export default function BadgesCard({ milestones = [] }) {
     });
   };
 
+  const earnedBadges = BADGES.filter((badge) => !!getAwardedDate(badge.type));
+  if (earnedBadges.length === 0) return null;
+
   return (
     <Card style={{ backgroundColor: theme.colors.surface }}>
       <Card.Content>
         <Text variant="titleMedium" style={{ color: theme.colors.onSurface, marginBottom: 16 }}>
-          🏅 Achievements
+          Achievements
         </Text>
         <View style={{ flexDirection: "row", justifyContent: "space-around" }}>
           {BADGES.map((badge) => {
@@ -51,14 +48,15 @@ export default function BadgesCard({ milestones = [] }) {
             return (
               <View
                 key={badge.type}
-                style={{ alignItems: "center", gap: 6, opacity: earned ? 1 : 0.3 }}
+                style={{ alignItems: "center", gap: 8, opacity: earned ? 1 : 0 }}
               >
-                <Text style={{ fontSize: 40 }}>{badge.emoji}</Text>
-                <Text variant="labelLarge" style={{ color: badge.color, fontWeight: "700" }}>
-                  {badge.label}
-                </Text>
+                <Image
+                  source={badge.image}
+                  style={{ width: 100, height: 100 }}
+                  resizeMode="contain"
+                />
                 <Text variant="labelSmall" style={{ color: theme.custom.muted }}>
-                  {earned ? awardedDate : `Day ${badge.day}`}
+                  {earned ? awardedDate : ""}
                 </Text>
               </View>
             );

@@ -40,10 +40,7 @@ export default function AISummaries() {
     <Card style={{ backgroundColor: theme.colors.surface }}>
       <Card.Content>
         <Text variant="titleMedium" style={{ color: theme.colors.onSurface, marginBottom: 4 }}>
-          🤖 AI Weekly Summaries
-        </Text>
-        <Text variant="bodySmall" style={{ color: theme.custom.muted, marginBottom: 16 }}>
-          Personalised insights generated every 7 days
+          AI Personalised Summaries
         </Text>
 
         {MOCK_SUMMARIES.map((item, index) => (

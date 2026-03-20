@@ -4,13 +4,6 @@ import { Card, Text, useTheme } from "react-native-paper";
 
 const screenWidth = Dimensions.get("window").width;
 
-// Mock weekly mood data — replace with real API data later
-// Each entry is the average mood for that week (weeks 1-10)
-const MOCK_WEEKLY_MOOD = {
-  labels: ["W1", "W2", "W3", "W4", "W5", "W6", "W7", "W8", "W9", "W10"],
-  datasets: [{ data: [3, 4, 2, 5, 3, 4, 5, 4, 3, 5] }],
-};
-
 const MOOD_LABELS = [
   { value: "1", label: "😞 Terrible" },
   { value: "2", label: "😕 Bad" },
@@ -19,25 +12,41 @@ const MOOD_LABELS = [
   { value: "5", label: "😄 Great" },
 ];
 
-export default function MoodChart() {
+export default function MoodChart({ days = [] }) {
   const theme = useTheme();
 
-  const chartWidth = Math.max(screenWidth - 40, MOCK_WEEKLY_MOOD.labels.length * 60);
+  if (days.length === 0) {
+    return (
+      <Card style={{ backgroundColor: theme.colors.surface }}>
+        <Card.Content>
+          <Text variant="titleMedium" style={{ color: theme.colors.onSurface, marginBottom: 4 }}>
+            Mood Over Time
+          </Text>
+          <Text variant="bodySmall" style={{ color: theme.custom.muted, fontStyle: "italic" }}>
+            No mood data yet — complete your first day to see your chart.
+          </Text>
+        </Card.Content>
+      </Card>
+    );
+  }
+
+  const chartData = {
+    labels: days.map((d) => `D${d.day_number}`),
+    datasets: [{ data: days.map((d) => d.mood_rating) }],
+  };
+
+  const chartWidth = Math.max(screenWidth - 40, days.length * 60);
 
   return (
     <Card style={{ backgroundColor: theme.colors.surface }}>
       <Card.Content>
         <Text variant="titleMedium" style={{ color: theme.colors.onSurface, marginBottom: 4 }}>
-          😊 Weekly Mood
-        </Text>
-        <Text variant="bodySmall" style={{ color: theme.custom.muted, marginBottom: 16 }}>
-          Your average mood rating each week
+          Mood Over Time
         </Text>
 
-        {/* Horizontally scrollable chart */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           <LineChart
-            data={MOCK_WEEKLY_MOOD}
+            data={chartData}
             width={chartWidth}
             height={200}
             fromZero
@@ -64,7 +73,6 @@ export default function MoodChart() {
           />
         </ScrollView>
 
-        {/* Legend */}
         <View
           style={{
             flexDirection: "row",

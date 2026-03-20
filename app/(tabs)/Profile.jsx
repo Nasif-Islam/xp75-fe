@@ -4,9 +4,11 @@ import { ActivityIndicator, Text, useTheme } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AISummaries from "../components/AISummaries";
 import BadgesCard from "../components/BadgesCard";
+import ChangePasswordModal from "../components/ChangePasswordModal";
+import EditProfileModal from "../components/EditProfileModal";
 import MoodChart from "../components/MoodChart";
+import MoodTracker from "../components/MoodTracker";
 import ProfileCard from "../components/ProfileCard";
-import UpdateProfileModal from "../components/UpdateProfileModal";
 import { useUserContext } from "../context/UserContext";
 
 const BASE_URL = "https://xp75-be.onrender.com";
@@ -14,21 +16,41 @@ const BASE_URL = "https://xp75-be.onrender.com";
 export default function Profile() {
   const { accessToken } = useUserContext();
   const theme = useTheme();
-  const [modalVisible, setModalVisible] = useState(false);
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [passwordModalVisible, setPasswordModalVisible] = useState(false);
   const [milestones, setMilestones] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [todayMood, setTodayMood] = useState(null);
+  const [days, setDays] = useState([]);
 
   useEffect(() => {
     if (!accessToken) {
       setLoading(false);
       return;
     }
-    fetch(`${BASE_URL}/api/milestones`, {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    })
-      .then((res) => res.json())
-      .then((data) => setMilestones(data))
-      .catch(() => setMilestones([]))
+
+    Promise.all([
+      fetch(`${BASE_URL}/api/milestones`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      }).then((res) => res.json()),
+      fetch(`${BASE_URL}/api/days`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      })
+        .then((res) => res.json())
+        .then((data) => (Array.isArray(data) ? data : data.days)),
+    ])
+      .then(([milestonesData, daysData]) => {
+        setMilestones(milestonesData);
+        setDays(daysData);
+        if (daysData.length > 0) {
+          const lastDay = daysData[daysData.length - 1];
+          setTodayMood(lastDay.mood_rating ?? null);
+        }
+      })
+      .catch(() => {
+        setMilestones([]);
+        setDays([]);
+      })
       .finally(() => setLoading(false));
   }, [accessToken]);
 
@@ -54,7 +76,11 @@ export default function Profile() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>
-      <UpdateProfileModal visible={modalVisible} onDismiss={() => setModalVisible(false)} />
+      <EditProfileModal visible={editModalVisible} onDismiss={() => setEditModalVisible(false)} />
+      <ChangePasswordModal
+        visible={passwordModalVisible}
+        onDismiss={() => setPasswordModalVisible(false)}
+      />
 
       <ScrollView
         contentContainerStyle={{ padding: 20, gap: 16 }}
@@ -67,9 +93,14 @@ export default function Profile() {
           Profile
         </Text>
 
-        <ProfileCard onEditPress={() => setModalVisible(true)} />
+        <ProfileCard
+          onEditPress={() => setEditModalVisible(true)}
+          onChangePasswordPress={() => setPasswordModalVisible(true)}
+        />
         <BadgesCard milestones={milestones} />
-        <MoodChart />
+        <MoodChart days={days} />
+        <MoodTracker mood={todayMood} isLocked={true} />
+
         <AISummaries />
 
         <View style={{ height: 24 }} />

@@ -1,15 +1,41 @@
 import React from "react";
-import { View, Text, TouchableOpacity, Image, StyleSheet } from "react-native";
-import { baseCard, ACCENT, MUTED, fontSizes, fontWeights } from "../styles/global";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  ACCENT,
+  CARD,
+  MUTED,
+  NAVY,
+  baseCard,
+  fontSizes,
+  fontWeights,
+  pillBtn,
+} from "../styles/global";
 
-export default function TaskCard({ task, done, submitted, locked, photo, toggle, pickImage }) {
+/**
+ * TaskCard — the core interactive row card for the app.
+ *
+ * Teammates: this card pattern (white, rounded, elevated) is the standard
+ * container for the whole app. The baseCard style from global.js gives you
+ * the same shadow/radius/bg — import it for reflection fields, achievement
+ * boxes, book cards, anything card-shaped. See app/styles/global.js.
+ */
+export default function TaskCard({
+  task,
+  done,
+  submitted,
+  locked,
+  photo,
+  toggle,
+  pickImage,
+  onOpenReflection,
+}) {
   const isDisabled = submitted || locked;
 
   return (
     <TouchableOpacity
       style={[baseCard.card, styles.card, isDisabled && styles.cardLocked]}
       onPress={() => toggle(task.key)}
-      activeOpacity={submitted ? 1 : 0.85}
+      activeOpacity={isDisabled ? 1 : 0.85}
     >
       <View style={styles.cardLeft}>
         <Text style={styles.cardEmoji}>{task.emoji}</Text>
@@ -25,17 +51,32 @@ export default function TaskCard({ task, done, submitted, locked, photo, toggle,
             {photo && <Image source={{ uri: photo }} style={styles.photoPreview} />}
             {!isDisabled && (
               <TouchableOpacity
-                style={styles.uploadBtn}
+                style={pillBtn.btn}
                 onPress={(e) => {
                   e.stopPropagation();
                   pickImage();
                 }}
                 activeOpacity={0.8}
               >
-                <Text style={styles.uploadBtnText}>{photo ? "Change" : "Upload"}</Text>
+                <Text style={pillBtn.text}>{photo ? "Change" : "Upload"}</Text>
               </TouchableOpacity>
             )}
           </View>
+        )}
+
+        {task.key === "reflection" && !isDisabled && (
+          <TouchableOpacity
+            style={[pillBtn.btn, done && pillBtn.btnDone]}
+            onPress={(e) => {
+              e.stopPropagation();
+              onOpenReflection();
+            }}
+            activeOpacity={0.8}
+          >
+            <Text style={[pillBtn.text, done && pillBtn.textDone]}>
+              {done ? "Done ✓" : "Start →"}
+            </Text>
+          </TouchableOpacity>
         )}
 
         <TouchableOpacity
@@ -46,9 +87,13 @@ export default function TaskCard({ task, done, submitted, locked, photo, toggle,
           ]}
           onPress={(e) => {
             e.stopPropagation();
+            if (task.key === "reflection" && !done && !isDisabled) {
+              onOpenReflection();
+              return;
+            }
             toggle(task.key);
           }}
-          activeOpacity={submitted ? 1 : 0.8}
+          activeOpacity={isDisabled ? 1 : 0.8}
         >
           {done && <Text style={styles.checkmark}>✓</Text>}
         </TouchableOpacity>
@@ -81,7 +126,7 @@ const styles = StyleSheet.create({
   cardLabel: {
     fontSize: fontSizes.md,
     fontWeight: fontWeights.semibold,
-    color: "#1A1A2E",
+    color: NAVY,
     letterSpacing: -0.2,
   },
   cardLabelDone: {
@@ -108,26 +153,15 @@ const styles = StyleSheet.create({
     height: 36,
     borderRadius: 6,
   },
-  uploadBtn: {
-    backgroundColor: "#EEF1FE",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 7,
-  },
-  uploadBtnText: {
-    color: ACCENT,
-    fontSize: fontSizes.sm,
-    fontWeight: fontWeights.semibold,
-  },
   checkbox: {
     width: 26,
     height: 26,
     borderRadius: 8,
     borderWidth: 2,
-    borderColor: "#D0D3E8",
+    borderColor: MUTED,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: CARD,
   },
   checkboxDone: {
     backgroundColor: ACCENT,
@@ -137,7 +171,7 @@ const styles = StyleSheet.create({
     borderColor: MUTED,
   },
   checkmark: {
-    color: "#FFFFFF",
+    color: CARD,
     fontSize: 14,
     fontWeight: fontWeights.bold,
     lineHeight: 18,

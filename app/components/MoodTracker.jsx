@@ -1,4 +1,4 @@
-import { View, TouchableOpacity, Text, StyleSheet } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 const MUTED = "#9A9AAF";
 
@@ -25,18 +25,22 @@ export default function MoodTracker({ mood, onSelect, isLocked }) {
       <Text style={styles.cardLabel}>
         {isLocked ? "Today's mood" : "How are you feeling today?"}
       </Text>
-      <View style={styles.moodRow}>
-        {[1, 2, 3, 4, 5].map((rating) => (
-          <TouchableOpacity
-            key={rating}
-            style={[styles.moodDot, mood >= rating && { backgroundColor: getMoodColor(mood) }]}
-            onPress={() => {
-              if (!isLocked) onSelect(rating);
-            }}
-            activeOpacity={isLocked ? 1 : 0.8}
-          />
-        ))}
-      </View>
+      {mood === null && isLocked ? (
+        <Text style={styles.emptyText}>No mood entered for today</Text>
+      ) : (
+        <View style={styles.moodRow}>
+          {[1, 2, 3, 4, 5].map((rating) => (
+            <TouchableOpacity
+              key={rating}
+              style={[styles.moodDot, mood >= rating && { backgroundColor: getMoodColor(mood) }]}
+              onPress={() => {
+                if (!isLocked) onSelect(rating);
+              }}
+              activeOpacity={isLocked ? 1 : 0.8}
+            />
+          ))}
+        </View>
+      )}
     </View>
   );
 }
@@ -71,5 +75,12 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     backgroundColor: "#E2E4EE",
     marginHorizontal: 4,
+  },
+  emptyText: {
+    fontSize: 13,
+    color: MUTED,
+    fontStyle: "italic",
+    textAlign: "center",
+    paddingVertical: 8,
   },
 });

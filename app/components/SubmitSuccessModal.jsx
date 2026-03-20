@@ -1,14 +1,26 @@
-import React, { useEffect } from "react";
-import { Modal, View, TouchableOpacity, Text, StyleSheet } from "react-native";
-import { VideoView, useVideoPlayer } from "expo-video";
 import { useEventListener } from "expo";
+import { VideoView, useVideoPlayer } from "expo-video";
+import { useEffect } from "react";
+import { Modal, StyleSheet, View } from "react-native";
 
-const ACCENT = "#4F6EF7";
-const SOURCE = require("../assets/add-a-character-in-a-hot-air-balloon-floating-upwa.mp4");
+const VIDEOS = {
+  balloon: require("../assets/add-a-character-in-a-hot-air-balloon-floating-upwa.mp4"),
+  bronze: require("../assets/bronze-achievement-badge-floating-in-the-center-of.mp4"),
+  silver: require("../assets/silver-achievement-badge-floating-gently-in-the-mi.mp4"),
+  gold: require("../assets/gold-achievement-medal-shooting-into-frame-like-a-.mp4"),
+};
 
-export default function SubmitSuccessModal({ visible, onClose }) {
-  const player = useVideoPlayer(SOURCE);
-  player.loop = true;
+function getVideoForDay(dayNumber) {
+  if (dayNumber === 75) return VIDEOS.gold;
+  if (dayNumber === 50) return VIDEOS.silver;
+  if (dayNumber === 25) return VIDEOS.bronze;
+  return VIDEOS.balloon;
+}
+
+export default function SubmitSuccessModal({ visible, onClose, dayNumber }) {
+  const source = getVideoForDay(dayNumber);
+  const player = useVideoPlayer(source);
+  player.loop = false;
   player.muted = true;
 
   useEffect(() => {
@@ -36,6 +48,7 @@ export default function SubmitSuccessModal({ visible, onClose }) {
     </Modal>
   );
 }
+
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
@@ -50,14 +63,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  video: { width: "100%", height: "100%" },
-  closeBtn: {
-    position: "absolute",
-    bottom: 40,
-    backgroundColor: ACCENT,
-    paddingHorizontal: 32,
-    paddingVertical: 12,
-    borderRadius: 10,
+  video: {
+    width: "100%",
+    height: "100%",
   },
-  closeBtnText: { color: "#fff", fontWeight: "700", fontSize: 15 },
 });

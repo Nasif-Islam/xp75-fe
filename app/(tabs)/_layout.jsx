@@ -1,5 +1,5 @@
-import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { Tabs } from "expo-router";
 
 const COLORS = {
   background: "#403557",
@@ -48,15 +48,6 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="Reflections"
-        options={{
-          title: "Reflections",
-          tabBarIcon: ({ color, size, focused }) => (
-            <Ionicons name={focused ? "create" : "create-outline"} size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="Map"
         options={{
           title: "Map",
@@ -74,7 +65,7 @@ export default function TabsLayout() {
         options={{
           title: "Social",
           tabBarIcon: ({ color, size, focused }) => (
-            <Ionicons name={focused ? "people" : "people-outline"} size={size} color={color} />
+            <Ionicons name={focused ? "globe" : "globe-outline"} size={size} color={color} />
           ),
         }}
       />

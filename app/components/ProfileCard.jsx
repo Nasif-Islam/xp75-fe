@@ -2,7 +2,7 @@ import { View } from "react-native";
 import { Avatar, Button, Card, Text, useTheme } from "react-native-paper";
 import { useUserContext } from "../context/UserContext";
 
-export default function ProfileCard({ onEditPress }) {
+export default function ProfileCard({ onEditPress, onChangePasswordPress }) {
   const { user } = useUserContext();
   const theme = useTheme();
 
@@ -28,9 +28,14 @@ export default function ProfileCard({ onEditPress }) {
             {user.email}
           </Text>
         </View>
-        <Button mode="contained" onPress={onEditPress}>
-          Edit Profile
-        </Button>
+        <View style={{ flexDirection: "row", gap: 8, marginTop: 4 }}>
+          <Button mode="contained" onPress={onEditPress} icon="account-edit">
+            Edit Profile
+          </Button>
+          <Button mode="outlined" onPress={onChangePasswordPress} icon="lock-reset">
+            Change Password
+          </Button>
+        </View>
       </Card.Content>
     </Card>
   );
