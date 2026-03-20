@@ -128,7 +128,8 @@ export default function HomeScreen() {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) return null;
-      return await res.json();
+      const data = await res.json();
+      return Array.isArray(data) ? data : (data.days ?? []);
     } catch (err) {
       console.warn("Could not fetch days from DB:", err);
       return null;
@@ -139,44 +140,50 @@ export default function HomeScreen() {
     async (userId, token) => {
       const days = await loadDayStateFromDB(token);
 
-      if (days.length === 0) {
-        setDayNumber(1);
-        setChecked(freshChecked());
-        setPhoto(null);
-        setSubmitted(false);
-        setReflectionData(null);
-        return;
-      }
+      if (days !== null) {
+        if (days.length === 0) {
+          setDayNumber(1);
+          setChecked(freshChecked());
+          setPhoto(null);
+          setSubmitted(false);
+          setReflectionData(null);
+          return;
+        }
 
-      const lastDay = days[days.length - 1];
-      const today = todayString();
-      const yesterday = new Date(Date.now() - 86400000).toISOString().split("T")[0];
-      const lastDayDate = lastDay.created_at ? lastDay.created_at.split("T")[0] : null;
-      const lastDayNumber = lastDay.day_number;
+        const lastDay = days[days.length - 1];
+        const lastDayNumber = lastDay?.day_number ?? 0;
 
-      if (lastDayDate === today || (!lastDayDate && days.length > 0)) {
+        if (lastDayNumber >= TOTAL_DAYS) {
+          setDayNumber(TOTAL_DAYS);
+          setChecked(checkedFromDay(lastDay));
+          setSubmitted(true);
+          return;
+        }
+
         setDayNumber(lastDayNumber);
         setChecked(checkedFromDay(lastDay));
         setSubmitted(true);
         return;
       }
 
-      if (lastDayDate === yesterday || lastDayNumber >= TOTAL_DAYS) {
-        const nextDay = Math.min(lastDayNumber + 1, TOTAL_DAYS);
-        setDayNumber(nextDay);
+      try {
+        const stored = await AsyncStorage.getItem(storageKey(userId));
+        if (stored) {
+          const { checked: c, photo: p, submitted: s } = JSON.parse(stored);
+          setChecked(c ?? freshChecked());
+          setPhoto(p ?? null);
+          setSubmitted(s ?? false);
+        } else {
+          setChecked(freshChecked());
+          setPhoto(null);
+          setSubmitted(false);
+        }
+      } catch (err) {
+        console.warn("AsyncStorage read failed:", err);
         setChecked(freshChecked());
         setPhoto(null);
         setSubmitted(false);
-        setReflectionData(null);
-        return;
       }
-
-      setDayNumber(1);
-      setChecked(freshChecked());
-      setPhoto(null);
-      setSubmitted(false);
-      setReflectionData(null);
-      return;
     },
     [loadDayStateFromDB],
   );
@@ -269,7 +276,7 @@ export default function HomeScreen() {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images"],
       allowsEditing: false,
-      quality: 1,
+      quality: 0.7,
     });
     if (!result.canceled) {
       const newPhoto = result.assets[0].uri;
@@ -288,30 +295,29 @@ export default function HomeScreen() {
       return;
     }
 
-    const formData = new FormData();
-    formData.append("day_number", String(dayNumber));
-    formData.append("diet_adhered", String(checked.diet));
-    formData.append("outdoor_workout_completed", String(checked.outdoorWorkout));
-    formData.append("indoor_workout_completed", String(checked.indoorWorkout));
-    formData.append("water_consumed", String(checked.water));
-    formData.append("pages_read", String(checked.reading));
-    formData.append("mood_rating", String(reflectionData.mood_rating));
-    formData.append("achievements", reflectionData.achievements);
-    formData.append("challenges", reflectionData.challenges);
-    formData.append("next_day_focus", reflectionData.next_day_focus);
-    if (photo) {
-      formData.append("progress_pic", {
-        uri: photo,
-        name: "progress-pic.jpg",
-        type: "image/jpeg",
-      });
-    }
+    const payload = new FormData();
+
+    payload.append("day_number", dayNumber);
+    payload.append("diet_adhered", checked.diet);
+    payload.append("outdoor_workout_completed", checked.outdoorWorkout);
+    payload.append("indoor_workout_completed", checked.indoorWorkout);
+    payload.append("water_consumed", checked.water);
+    payload.append("pages_read", checked.reading);
+    payload.append("mood_rating", reflectionData.mood_rating);
+    payload.append("achievements", reflectionData.achievements);
+    payload.append("challenges", reflectionData.challenges);
+    payload.append("next_day_focus", reflectionData.next_day_focus);
+    payload.append("progress_pic", {
+      uri: photo,
+      name: "progress-pic.jpg",
+      type: "image/jpeg",
+    });
 
     try {
       const res = await fetch(`${BASE_URL}/api/days`, {
         method: "POST",
         headers: { Authorization: `Bearer ${accessToken}` },
-        body: formData,
+        body: payload,
       });
 
       const data = await res.json();

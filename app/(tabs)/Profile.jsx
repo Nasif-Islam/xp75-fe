@@ -22,6 +22,7 @@ export default function Profile() {
   const [loading, setLoading] = useState(true);
   const [todayMood, setTodayMood] = useState(null);
   const [days, setDays] = useState([]);
+  const [summaries, setSummaries] = useState([]);
 
   useEffect(() => {
     if (!accessToken) {
@@ -37,11 +38,15 @@ export default function Profile() {
         headers: { Authorization: `Bearer ${accessToken}` },
       })
         .then((res) => res.json())
-        .then((data) => (Array.isArray(data) ? data : data.days)),
+        .then((data) => {
+          if (Array.isArray(data)) return { days: data, summaries: [] };
+          return { days: data.days ?? [], summaries: data.summaries ?? [] };
+        }),
     ])
-      .then(([milestonesData, daysData]) => {
+      .then(([milestonesData, { days: daysData, summaries: summariesData }]) => {
         setMilestones(milestonesData);
         setDays(daysData);
+        setSummaries(summariesData);
         if (daysData.length > 0) {
           const lastDay = daysData[daysData.length - 1];
           setTodayMood(lastDay.mood_rating ?? null);
@@ -101,7 +106,7 @@ export default function Profile() {
         <MoodChart days={days} />
         <MoodTracker mood={todayMood} isLocked={true} />
 
-        <AISummaries />
+        <AISummaries summaries={summaries} />
 
         <View style={{ height: 24 }} />
       </ScrollView>

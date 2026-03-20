@@ -1,15 +1,13 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { View, Modal, StyleSheet, Pressable, Text, ScrollView, Animated } from "react-native";
-import { useState, useEffect, useRef } from "react";
-import { mockReflections } from "../mockData/reflectionsData";
+import { useEffect, useRef, useState } from "react";
+import { Animated, Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
-export default function ReflectionModal({ dayId, userId, isLatest }) {
+export default function ReflectionModal({ dayId, isLatest, data }) {
   const [visible, setVisible] = useState(false);
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
-  const user = mockReflections.find((entry) => entry.day_id === dayId && entry.user_id === userId);
-
-  const hasReflection = !!user;
+  const today = data.find((day) => day.day_number === dayId);
+  const hasReflection = !!today;
 
   useEffect(() => {
     if (!isLatest) return;
@@ -31,7 +29,7 @@ export default function ReflectionModal({ dayId, userId, isLatest }) {
 
     pulse.start();
     return () => pulse.stop();
-  }, [isLatest]);
+  }, [isLatest, pulseAnim]);
 
   return (
     <View>
@@ -96,14 +94,14 @@ export default function ReflectionModal({ dayId, userId, isLatest }) {
               contentContainerStyle={styles.scrollContent}
               showsVerticalScrollIndicator={false}
             >
-              {user && (
+              {today && (
                 <>
-                  <Section icon="trophy-outline" label="Achievements" body={user.achievements} />
-                  <Section icon="thunderstorm-outline" label="Challenges" body={user.challenges} />
+                  <Section icon="trophy-outline" label="Achievements" body={today.achievements} />
+                  <Section icon="thunderstorm-outline" label="Challenges" body={today.challenges} />
                   <Section
                     icon="arrow-forward-circle-outline"
                     label="Tomorrow's Focus"
-                    body={user.next_day_focus}
+                    body={today.next_day_focus}
                   />
                 </>
               )}
