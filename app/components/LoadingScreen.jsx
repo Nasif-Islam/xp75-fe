@@ -1,5 +1,5 @@
 import { useVideoPlayer, VideoView } from "expo-video";
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { Animated, Dimensions, StyleSheet, Text, View } from "react-native";
 import { fontSizes, fontWeights } from "../styles/global";
 
@@ -24,7 +24,7 @@ export default function LoadingScreen({ onReady }) {
     if (!onReady) return;
     Animated.timing(opacity, {
       toValue: 0,
-      duration: 800,
+      duration: 500,
       useNativeDriver: true,
     }).start(onReady);
   }, [onReady]);

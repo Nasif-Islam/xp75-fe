@@ -5,8 +5,8 @@ import { Modal, StyleSheet, View } from "react-native";
 
 const VIDEOS = {
   balloon: require("../assets/add-a-character-in-a-hot-air-balloon-floating-upwa.mp4"),
-  bronze: require("../assets/bronze-achievement-badge-floating-in-the-center-of.mp4"),
-  silver: require("../assets/silver-achievement-badge-floating-gently-in-the-mi.mp4"),
+  bronze: require("../assets/bronze-achievement-medal-flying-into-frame-like-a-.mp4"),
+  silver: require("../assets/silver-achievement-medal-shooting-into-frame-like-.mp4"),
   gold: require("../assets/gold-achievement-medal-shooting-into-frame-like-a-.mp4"),
 };
 

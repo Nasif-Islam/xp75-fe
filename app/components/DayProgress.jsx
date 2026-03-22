@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { ACCENT, MUTED, TEXT, fontSizes, fontWeights } from "../styles/global";
 
 export default function DayProgress({ completedCount, totalTasks, dayNumber, totalDays }) {

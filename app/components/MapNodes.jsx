@@ -40,14 +40,16 @@ export default function MapNodes({ imgWidth, imgHeight }) {
           },
         });
         const result = response.data;
-        setData(Array.isArray(result) ? result : [result]);
+        // setData(Array.isArray(result) ? result : [result]);
+
+        setData(result.days);
       } catch (error) {
         setErr(error);
         console.log(error);
       }
     };
     asyncFetchDay();
-  }, [accessToken]);
+  }, []);
 
   return (
     <View style={StyleSheet.absoluteFill} pointerEvents="box-none">

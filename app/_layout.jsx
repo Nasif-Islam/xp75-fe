@@ -8,6 +8,8 @@ export default function RootLayout() {
     <UserProvider>
       <PaperProvider theme={theme}>
         <Stack>
+          <Stack.Screen name="index" options={{ headerShown: false }} />
+          <Stack.Screen name="Login" options={{ headerShown: false }} />
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         </Stack>
       </PaperProvider>
