@@ -1,15 +1,23 @@
-import { Dimensions, ScrollView, View } from "react-native";
+import { Dimensions, Image, ScrollView, View } from "react-native";
 import { LineChart } from "react-native-chart-kit";
 import { Card, Text, useTheme } from "react-native-paper";
 
 const screenWidth = Dimensions.get("window").width;
 
+const MOOD_IMAGES = {
+  1: require("../assets/low.png"),
+  2: require("../assets/tired.png"),
+  3: require("../assets/neutral.png"),
+  4: require("../assets/good.png"),
+  5: require("../assets/great.png"),
+};
+
 const MOOD_LABELS = [
-  { value: "1", label: "😞 Terrible" },
-  { value: "2", label: "😕 Bad" },
-  { value: "3", label: "😐 Neutral" },
-  { value: "4", label: "🙂 Good" },
-  { value: "5", label: "😄 Great" },
+  { value: "1", label: "Rough" },
+  { value: "2", label: "Low" },
+  { value: "3", label: "Okay" },
+  { value: "4", label: "Good" },
+  { value: "5", label: "Great" },
 ];
 
 export default function MoodChart({ days = [] }) {
@@ -90,8 +98,12 @@ export default function MoodChart({ days = [] }) {
                 paddingHorizontal: 10,
                 paddingVertical: 4,
                 borderRadius: 20,
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 6,
               }}
             >
+              <Image source={MOOD_IMAGES[Number(mood.value)]} style={{ width: 20, height: 20 }} />
               <Text variant="labelSmall" style={{ color: theme.custom.muted }}>
                 {mood.label}
               </Text>

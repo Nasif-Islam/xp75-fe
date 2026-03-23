@@ -1,6 +1,6 @@
 import { useNavigation } from "@react-navigation/native";
 import * as ImagePicker from "expo-image-picker";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Alert, AppState, SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
 import DayProgress from "../components/DayProgress";
 import HomeHeader from "../components/HomeHeader";
@@ -11,25 +11,14 @@ import SubmitSuccessModal from "../components/SubmitSuccessModal";
 import TaskCard from "../components/TaskCard";
 import { TASKS, TOTAL_DAYS } from "../constants/tasks";
 import { useUserContext } from "../context/UserContext";
-import { useApiStatus } from "../hooks/useApiStatus";
 import { useDayState } from "../hooks/useDayState";
-import {
-  ACCENT,
-  ACCENT_SOFT,
-  BG,
-  DANGER,
-  SUCCESS,
-  baseCard,
-  fontSizes,
-  fontWeights,
-} from "../styles/global";
+import { ACCENT, ACCENT_SOFT, BG, baseCard, fontSizes, fontWeights } from "../styles/global";
 
 const BASE_URL = "https://xp75-be.onrender.com";
 
 export default function HomeScreen() {
   const { user, accessToken, logout } = useUserContext();
   const navigation = useNavigation();
-  const apiStatus = useApiStatus();
   const {
     checked,
     setChecked,
@@ -61,7 +50,7 @@ export default function HomeScreen() {
 
   useEffect(() => {
     const sub = AppState.addEventListener("change", (state) => {
-      if (state === "active" && user && accessToken) {
+      if (state === "active" && user && accessToken && !isPickingImage.current) {
         loadUserDayState(user.id, accessToken);
       }
     });
@@ -97,6 +86,8 @@ export default function HomeScreen() {
     });
   };
 
+  const isPickingImage = useRef(false);
+
   const pickImage = async () => {
     if (submitted || !user) return;
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -104,11 +95,17 @@ export default function HomeScreen() {
       Alert.alert("Permission required", "Permission to access the photo library is required.");
       return;
     }
+
+    isPickingImage.current = true;
+
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images"],
       allowsEditing: false,
       quality: 0.5,
     });
+
+    isPickingImage.current = false;
+
     if (!result.canceled) {
       const newPhoto = result.assets[0].uri;
       setPhoto(newPhoto);
@@ -121,18 +118,25 @@ export default function HomeScreen() {
   };
 
   const handleSubmit = async () => {
+    if (submitted) return;
+
     if (!reflectionData) {
       Alert.alert("Reflection required", "Please complete your reflection before submitting.");
       return;
     }
 
+    if (!photo) {
+      Alert.alert("Photo required", "Please add a progress photo before submitting.");
+      return;
+    }
+
     const formData = new FormData();
     formData.append("day_number", String(dayNumber));
-    formData.append("diet_adhered", String(checked.diet));
-    formData.append("outdoor_workout_completed", String(checked.outdoorWorkout));
-    formData.append("indoor_workout_completed", String(checked.indoorWorkout));
-    formData.append("water_consumed", String(checked.water));
-    formData.append("pages_read", String(checked.reading));
+    formData.append("diet_adhered", checked.diet ? "true" : "");
+    formData.append("outdoor_workout_completed", checked.outdoorWorkout ? "true" : "");
+    formData.append("indoor_workout_completed", checked.indoorWorkout ? "true" : "");
+    formData.append("water_consumed", checked.water ? "true" : "");
+    formData.append("pages_read", checked.reading ? "true" : "");
     formData.append("mood_rating", String(reflectionData.mood_rating));
     formData.append("achievements", reflectionData.achievements);
     formData.append("challenges", reflectionData.challenges);
@@ -194,10 +198,6 @@ export default function HomeScreen() {
       />
 
       <HomeHeader user={user} onPressLogin={() => setLoginVisible(true)} />
-
-      <Text style={[styles.apiStatus, { color: apiStatus.includes("✓") ? SUCCESS : DANGER }]}>
-        {apiStatus}
-      </Text>
 
       <DayProgress
         completedCount={completedCount}

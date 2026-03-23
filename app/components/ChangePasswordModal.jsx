@@ -32,7 +32,7 @@ export default function ChangePasswordModal({ visible, onDismiss }) {
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error || "Failed to change password");
+        setError(data.message || "Failed to change password");
         return;
       }
       setSuccess("Password changed ✓");

@@ -1,23 +1,22 @@
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+
+const MOOD_IMAGES = {
+  1: require("../assets/low.png"),
+  2: require("../assets/tired.png"),
+  3: require("../assets/neutral.png"),
+  4: require("../assets/good.png"),
+  5: require("../assets/great.png"),
+};
+
+const MOOD_LABELS = {
+  1: "Rough",
+  2: "Low",
+  3: "Okay",
+  4: "Good",
+  5: "Great",
+};
 
 const MUTED = "#9A9AAF";
-
-const getMoodColor = (rating) => {
-  switch (rating) {
-    case 1:
-      return "#E05555";
-    case 2:
-      return "#E07A55";
-    case 3:
-      return "#E0C155";
-    case 4:
-      return "#82C55A";
-    case 5:
-      return "#55C57A";
-    default:
-      return "#E2E4EE";
-  }
-};
 
 export default function MoodTracker({ mood, onSelect, isLocked }) {
   return (
@@ -32,12 +31,20 @@ export default function MoodTracker({ mood, onSelect, isLocked }) {
           {[1, 2, 3, 4, 5].map((rating) => (
             <TouchableOpacity
               key={rating}
-              style={[styles.moodDot, mood >= rating && { backgroundColor: getMoodColor(mood) }]}
+              style={[styles.moodBtn, mood === rating && styles.moodBtnSelected]}
               onPress={() => {
                 if (!isLocked) onSelect(rating);
               }}
               activeOpacity={isLocked ? 1 : 0.8}
-            />
+            >
+              <Image
+                source={MOOD_IMAGES[rating]}
+                style={[styles.moodImg, mood !== null && mood !== rating && styles.moodImgDim]}
+              />
+              <Text style={[styles.moodLabel, mood === rating && styles.moodLabelActive]}>
+                {MOOD_LABELS[rating]}
+              </Text>
+            </TouchableOpacity>
           ))}
         </View>
       )}
@@ -69,12 +76,32 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
-  moodDot: {
+  moodBtn: {
     flex: 1,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "#E2E4EE",
-    marginHorizontal: 4,
+    alignItems: "center",
+    gap: 4,
+    paddingVertical: 8,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: "transparent",
+  },
+  moodBtnSelected: {
+    borderColor: "#b9b9c8",
+  },
+  moodImg: {
+    width: 40,
+    height: 40,
+  },
+  moodImgDim: {
+    opacity: 0.3,
+  },
+  moodLabel: {
+    fontSize: 9,
+    color: MUTED,
+  },
+  moodLabelActive: {
+    color: "#5C5C8A",
+    fontWeight: "600",
   },
   emptyText: {
     fontSize: 13,
