@@ -1,4 +1,4 @@
-import { Dimensions, Image, ScrollView, View } from "react-native";
+import { Dimensions, Image, ScrollView, StyleSheet, View } from "react-native";
 import { LineChart } from "react-native-chart-kit";
 import { Card, Text, useTheme } from "react-native-paper";
 
@@ -25,12 +25,12 @@ export default function MoodChart({ days = [] }) {
 
   if (days.length === 0) {
     return (
-      <Card style={{ backgroundColor: theme.colors.surface }}>
+      <Card style={styles.card}>
         <Card.Content>
-          <Text variant="titleMedium" style={{ color: theme.colors.onSurface, marginBottom: 4 }}>
-            Mood Over Time
+          <Text variant="titleMedium" style={styles.title}>
+            Mood Chart
           </Text>
-          <Text variant="bodySmall" style={{ color: theme.custom.muted, fontStyle: "italic" }}>
+          <Text variant="bodySmall" style={styles.emptyText}>
             No mood data yet — complete your first day to see your chart.
           </Text>
         </Card.Content>
@@ -39,74 +39,66 @@ export default function MoodChart({ days = [] }) {
   }
 
   const chartData = {
-    labels: days.map((d) => `D${d.day_number}`),
+    labels: days.map((d) => `${d.day_number}`),
     datasets: [{ data: days.map((d) => d.mood_rating) }],
   };
 
-  const chartWidth = Math.max(screenWidth - 40, days.length * 60);
+  const chartWidth = Math.max(screenWidth - 60, days.length * 60);
 
   return (
-    <Card style={{ backgroundColor: theme.colors.surface }}>
+    <Card style={styles.card}>
       <Card.Content>
-        <Text variant="titleMedium" style={{ color: theme.colors.onSurface, marginBottom: 4 }}>
-          Mood Over Time
+        <Text variant="titleMedium" style={styles.title}>
+          Mood Chart
         </Text>
 
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <LineChart
-            data={chartData}
-            width={chartWidth}
-            height={200}
-            fromZero
-            yAxisInterval={1}
-            chartConfig={{
-              backgroundColor: theme.colors.surface,
-              backgroundGradientFrom: theme.colors.surface,
-              backgroundGradientTo: theme.colors.surface,
-              decimalPlaces: 0,
-              color: () => theme.colors.primary,
-              labelColor: () => theme.custom.muted,
-              propsForDots: {
-                r: "5",
-                strokeWidth: "2",
-                stroke: theme.colors.secondary,
-                fill: theme.custom.yellow,
-              },
-              propsForBackgroundLines: {
-                stroke: theme.colors.background,
-              },
-            }}
-            bezier
-            style={{ borderRadius: 12 }}
-          />
-        </ScrollView>
+        <View style={styles.mainLayout}>
+          <View style={styles.yAxisTitleContainer}>
+            <Text style={styles.axisTextVertical}>MOOD</Text>
+          </View>
 
-        <View
-          style={{
-            flexDirection: "row",
-            flexWrap: "wrap",
-            gap: 8,
-            marginTop: 16,
-            justifyContent: "center",
-          }}
-        >
+          <View style={styles.scrollContainer}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <View>
+                <LineChart
+                  data={chartData}
+                  width={chartWidth}
+                  height={220}
+                  fromZero
+                  segments={4}
+                  chartConfig={{
+                    backgroundColor: "#fff",
+                    backgroundGradientFrom: "#fff",
+                    backgroundGradientTo: "#fff",
+                    decimalPlaces: 0,
+                    color: () => "#5C5C8A",
+                    labelColor: () => "#9A9AAF",
+                    propsForDots: {
+                      r: "5",
+                      strokeWidth: "2",
+                      stroke: "#5C5C8A",
+                    },
+                    propsForBackgroundLines: {
+                      stroke: "#F0F0F0",
+                    },
+                  }}
+                  bezier
+                  style={styles.chartStyle}
+                />
+              </View>
+            </ScrollView>
+
+            <View style={styles.xAxisTitleContainer}>
+              <Text style={styles.axisTextHorizontal}>DAYS</Text>
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.legendWrapper}>
           {MOOD_LABELS.map((mood) => (
-            <View
-              key={mood.value}
-              style={{
-                backgroundColor: theme.colors.background,
-                paddingHorizontal: 10,
-                paddingVertical: 4,
-                borderRadius: 20,
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 6,
-              }}
-            >
-              <Image source={MOOD_IMAGES[Number(mood.value)]} style={{ width: 20, height: 20 }} />
-              <Text variant="labelSmall" style={{ color: theme.custom.muted }}>
-                {mood.label}
-              </Text>
+            <View key={mood.value} style={styles.legendItem}>
+              <Image source={MOOD_IMAGES[Number(mood.value)]} style={styles.legendImage} />
+              <Text style={styles.legendValue}>{mood.value}</Text>
             </View>
           ))}
         </View>
@@ -114,3 +106,81 @@ export default function MoodChart({ days = [] }) {
     </Card>
   );
 }
+
+const styles = StyleSheet.create({
+  card: {
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    marginHorizontal: 16,
+    marginTop: 16,
+    elevation: 2,
+  },
+  title: {
+    fontWeight: "800",
+    color: "#1A1A2E",
+    marginBottom: 16,
+  },
+  mainLayout: {
+    flexDirection: "row",
+  },
+  yAxisTitleContainer: {
+    width: 35,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 5,
+  },
+  axisTextVertical: {
+    fontSize: 10,
+    fontWeight: "900",
+    color: "#9A9AAF",
+    transform: [{ rotate: "-90deg" }],
+    width: 100,
+    textAlign: "center",
+    letterSpacing: 1.5,
+  },
+  scrollContainer: {
+    flex: 1,
+  },
+  chartStyle: {
+    paddingRight: 45,
+    marginTop: 8,
+  },
+  xAxisTitleContainer: {
+    alignItems: "center",
+    marginTop: 5,
+    paddingRight: 40,
+  },
+  axisTextHorizontal: {
+    fontSize: 10,
+    fontWeight: "900",
+    color: "#9A9AAF",
+    letterSpacing: 2,
+  },
+  legendWrapper: {
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 16,
+    marginTop: 24,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: "#F0F0F0",
+  },
+  legendItem: {
+    alignItems: "center",
+    gap: 4,
+  },
+  legendImage: {
+    width: 24,
+    height: 24,
+  },
+  legendValue: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#5C5C8A",
+  },
+  emptyText: {
+    color: "#9A9AAF",
+    fontStyle: "italic",
+    paddingVertical: 10,
+  },
+});
