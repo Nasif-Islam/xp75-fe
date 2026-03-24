@@ -5,6 +5,14 @@ const AVATAR_4 = require("../assets/avatar_4.png");
 
 export const GLOBAL_USERS = [
   {
+    id: "me",
+    name: "Alex Carter",
+    day_number: 75,
+    points: 1380,
+    isMe: true,
+    avatar_url: AVATAR_1,
+  },
+  {
     id: "1",
     name: "Alex Johnson",
     day_number: 68,
@@ -19,12 +27,11 @@ export const GLOBAL_USERS = [
     avatar_url: AVATAR_3,
   },
   {
-    id: "me",
+    id: "3",
     name: "Marcus Webb",
     day_number: 51,
     points: 980,
-    isMe: true,
-    avatar_url: AVATAR_1,
+    avatar_url: AVATAR_2,
   },
   {
     id: "4",
