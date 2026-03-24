@@ -1,6 +1,6 @@
 import { useVideoPlayer, VideoView } from "expo-video";
 import { useEffect, useRef } from "react";
-import { Animated, Dimensions, StyleSheet, Text, View } from "react-native";
+import { Animated, Dimensions, Image, StyleSheet, Text, View } from "react-native";
 import { fontSizes, fontWeights } from "../styles/global";
 
 const SOURCE = require("../assets/slow-zoom-in-on-the-mountain-peak-and-path-no-peop.mp4");
@@ -36,6 +36,7 @@ export default function LoadingScreen({ onReady }) {
       </View>
       <View style={styles.overlay} />
       <View style={styles.content}>
+        <Image source={require("../assets/logo.jpg")} style={styles.logo} />
         <Text style={styles.title}>75XP</Text>
         <Text style={styles.subtitle}>connecting...</Text>
       </View>
@@ -80,5 +81,11 @@ const styles = StyleSheet.create({
     color: "rgba(255,255,255,0.6)",
     fontWeight: fontWeights.medium,
     letterSpacing: 2,
+  },
+  logo: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    marginBottom: 8,
   },
 });

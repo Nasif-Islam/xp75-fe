@@ -146,6 +146,7 @@ export default function LoginScreen() {
         >
           <View style={styles.inner}>
             <View style={styles.header}>
+              <Image source={require("./assets/logo.jpg")} style={styles.logo} />
               <Text style={styles.appName}>75XP</Text>
               <Text style={styles.tagline}>Track your 75 day journey</Text>
             </View>
@@ -355,5 +356,11 @@ const styles = StyleSheet.create({
     color: CARD,
     fontWeight: fontWeights.bold,
     fontSize: fontSizes.md,
+  },
+  logo: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    marginBottom: 12,
   },
 });

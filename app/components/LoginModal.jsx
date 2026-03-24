@@ -3,6 +3,7 @@ import { StatusBar } from "expo-status-bar";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
+  Image,
   Modal,
   SafeAreaView,
   StyleSheet,
@@ -55,6 +56,7 @@ export default function LoginModal({ visible, onClose, user, accessToken, onLogo
           </View>
 
           <View style={styles.header}>
+            <Image source={require("../assets/logo.jpg")} style={styles.logo} />
             <Text style={styles.appName}>75XP</Text>
             <Text style={styles.tagline}>Track your 75 day journey</Text>
           </View>
@@ -146,5 +148,11 @@ const styles = StyleSheet.create({
     fontSize: fontSizes.sm,
     fontWeight: fontWeights.semibold,
     color: NAVY,
+  },
+  logo: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    marginBottom: 12,
   },
 });
