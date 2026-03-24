@@ -1,14 +1,15 @@
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function GroupCard({ group, joined, onJoin }) {
   return (
     <View style={styles.groupRow}>
       <View style={styles.groupIcon}>
-        <Text style={styles.groupIconText}>👥</Text>
+        <MaterialCommunityIcons name="account-group-outline" size={22} color="#403557" />
       </View>
       <View style={styles.groupInfo}>
         <Text style={styles.groupName}>{group.name}</Text>
-        <Text style={styles.groupMeta}>
+        <Text numberOfLines={1} style={styles.groupMeta}>
           {group.members} members · {group.description}
         </Text>
       </View>
@@ -24,30 +25,32 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#fff",
-    borderRadius: 12,
+    borderRadius: 14,
     padding: 12,
-    marginBottom: 8,
+    marginBottom: 10,
     gap: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 2,
     borderLeftWidth: 4,
     borderLeftColor: "#403557",
   },
   groupIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#EEF1FE",
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: "#F0F2FF",
     justifyContent: "center",
     alignItems: "center",
-  },
-  groupIconText: {
-    fontSize: 18,
   },
   groupInfo: {
     flex: 1,
   },
   groupName: {
-    fontSize: 14,
-    fontWeight: "600",
+    fontSize: 15,
+    fontWeight: "700",
     color: "#1A1A2E",
   },
   groupMeta: {
@@ -57,9 +60,9 @@ const styles = StyleSheet.create({
   },
   joinBtn: {
     backgroundColor: "#403557",
-    paddingHorizontal: 14,
+    paddingHorizontal: 16,
     paddingVertical: 8,
-    borderRadius: 8,
+    borderRadius: 10,
   },
   joinBtnJoined: {
     backgroundColor: "#22C55E",
@@ -67,6 +70,6 @@ const styles = StyleSheet.create({
   joinBtnText: {
     color: "#fff",
     fontSize: 13,
-    fontWeight: "600",
+    fontWeight: "700",
   },
 });

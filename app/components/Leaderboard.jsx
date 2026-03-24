@@ -1,5 +1,4 @@
-import React from "react";
-import { View, Text, Image, StyleSheet } from "react-native";
+import { Image, StyleSheet, Text, View } from "react-native";
 
 const RANK_COLORS = {
   1: "#FFD700",
@@ -7,20 +6,24 @@ const RANK_COLORS = {
   3: "#CD7F32",
 };
 
-export default function Leaderboard({ user, rank }) {
+export default function Leaderboard({ user, rank, isMe }) {
   const rankColor = RANK_COLORS[rank] || "#9A9AAF";
+
   const initials = user.name
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase();
+    ? user.name
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2)
+    : "??";
 
   return (
     <View
       style={[
         styles.row,
-        rank <= 3 && { borderWidth: 2, borderColor: rankColor },
-        user.isMe && styles.myRow,
+        rank <= 3 && { borderWidth: 1.5, borderColor: rankColor },
+        isMe && styles.myRow,
       ]}
     >
       <Text style={[styles.rank, { color: rankColor }]}>{rank}</Text>
@@ -28,17 +31,24 @@ export default function Leaderboard({ user, rank }) {
       {user.avatar_url ? (
         <Image source={{ uri: user.avatar_url }} style={styles.avatar} />
       ) : (
-        <View style={[styles.avatarFallback, { backgroundColor: rankColor }]}>
+        <View style={[styles.avatarFallback, { backgroundColor: isMe ? "#4F6EF7" : rankColor }]}>
           <Text style={styles.initials}>{initials}</Text>
         </View>
       )}
 
       <View style={styles.info}>
-        <Text style={[styles.name, user.isMe && styles.myName]}>{user.name}</Text>
-        <Text style={styles.days}>{user.days_completed} days completed</Text>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+          <Text style={[styles.name, isMe && styles.myName]}>{user.name}</Text>
+          {isMe && (
+            <View style={styles.badge}>
+              <Text style={styles.badgeText}>YOU</Text>
+            </View>
+          )}
+        </View>
+        <Text style={styles.days}>Day {user.day_number || 0} of 75</Text>
       </View>
 
-      <Text style={styles.points}>{user.points} pts</Text>
+      <Text style={styles.points}>{user.points || user.day_number * 10} pts</Text>
     </View>
   );
 }
@@ -50,29 +60,34 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderRadius: 12,
     padding: 12,
-    marginBottom: 8,
+    marginBottom: 10,
     gap: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
   },
   myRow: {
-    backgroundColor: "#EEF1FE",
-    borderWidth: 2,
+    backgroundColor: "#F0F3FF",
     borderColor: "#4F6EF7",
+    borderWidth: 1.5,
   },
   rank: {
     fontSize: 16,
-    fontWeight: "700",
-    width: 24,
+    fontWeight: "800",
+    width: 28,
     textAlign: "center",
   },
   avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
   },
   avatarFallback: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -85,12 +100,24 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   name: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: "600",
     color: "#1A1A2E",
   },
   myName: {
     color: "#4F6EF7",
+    fontWeight: "700",
+  },
+  badge: {
+    backgroundColor: "#4F6EF7",
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  badgeText: {
+    color: "#fff",
+    fontSize: 9,
+    fontWeight: "900",
   },
   days: {
     fontSize: 12,
@@ -98,8 +125,8 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   points: {
-    fontSize: 13,
-    fontWeight: "700",
+    fontSize: 14,
+    fontWeight: "800",
     color: "#1A1A2E",
   },
 });

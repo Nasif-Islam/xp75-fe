@@ -11,7 +11,6 @@ export default function EditProfileModal({ visible, onDismiss }) {
   const theme = useTheme();
 
   const [name, setName] = useState(user?.name || "");
-  const [email, setEmail] = useState(user?.email || "");
   const [avatarPreview, setAvatarPreview] = useState(user?.avatar_url || null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -121,15 +120,6 @@ export default function EditProfileModal({ visible, onDismiss }) {
           value={name}
           onChangeText={setName}
           mode="outlined"
-          style={{ marginBottom: 12 }}
-        />
-        <TextInput
-          label="Email"
-          value={email}
-          onChangeText={setEmail}
-          mode="outlined"
-          keyboardType="email-address"
-          autoCapitalize="none"
           style={{ marginBottom: 20 }}
         />
 

@@ -57,6 +57,12 @@ export default function HomeScreen() {
     return () => sub.remove();
   }, [user, accessToken, loadUserDayState]);
 
+  useEffect(() => {
+    if (user && accessToken) {
+      loadUserDayState(user.id, accessToken);
+    }
+  }, [user, accessToken]);
+
   const handleLogout = () => {
     clearMidnightTimers();
     logout();
