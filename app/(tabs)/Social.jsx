@@ -35,7 +35,7 @@ export default function Social() {
         </View>
 
         <View style={[styles.headerRow, { marginTop: 32 }]}>
-          <Image source={require("../../assets/groups.png")} style={styles.headerIcon} />
+          <Image source={require("../assets/groups.png")} style={styles.headerIcon} />
           <View style={styles.headerText}>
             <Text style={styles.sectionTitle}>Suggested Groups</Text>
             <Text style={styles.hint}>Find a group with similar interests to stay on track</Text>
