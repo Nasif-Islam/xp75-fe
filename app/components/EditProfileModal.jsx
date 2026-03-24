@@ -16,6 +16,7 @@ export default function EditProfileModal({ visible, onDismiss }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const [newImage, setNewImage] = useState(null);
 
   const handlePickImage = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -28,6 +29,7 @@ export default function EditProfileModal({ visible, onDismiss }) {
     });
     if (!result.canceled) {
       setAvatarPreview(result.assets[0].uri);
+      setNewImage(result.assets[0].uri);
     }
   };
 
@@ -36,13 +38,21 @@ export default function EditProfileModal({ visible, onDismiss }) {
     setError(null);
     setSuccess(null);
     try {
+      const formData = new FormData();
+      formData.append("name", name);
+
+      if (newImage) {
+        formData.append("avatar_pic", {
+          uri: newImage,
+          name: "avatar.jpg",
+          type: "image/jpeg",
+        });
+      }
+
       const res = await fetch(`${BASE_URL}/api/profile`, {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify({ name, email, avatar_url: avatarPreview }),
+        headers: { Authorization: `Bearer ${accessToken}` },
+        body: formData,
       });
       const data = await res.json();
       if (!res.ok) {
@@ -51,6 +61,7 @@ export default function EditProfileModal({ visible, onDismiss }) {
       }
       login(data.user, accessToken);
       setSuccess("Profile updated ✓");
+      setNewImage(null);
     } catch {
       setError("Could not reach the server");
     } finally {

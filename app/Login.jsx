@@ -31,24 +31,10 @@ import {
 const BASE_URL = "https://xp75-be.onrender.com";
 
 const AVATARS = [
-  "https://i.pravatar.cc/150?u=user1.jpg",
-  "https://i.pravatar.cc/150?u=user2.jpg",
-  "https://i.pravatar.cc/150?u=user3.jpg",
-  "https://i.pravatar.cc/150?u=user4.jpg",
-  "https://i.pravatar.cc/150?u=user5.jpg",
-  "https://i.pravatar.cc/150?u=user6.jpg",
-  "https://i.pravatar.cc/150?u=user7.jpg",
-  "https://i.pravatar.cc/150?u=user8.jpg",
-  "https://i.pravatar.cc/150?u=user9.jpg",
-  "https://i.pravatar.cc/150?u=user10.jpg",
-  "https://i.pravatar.cc/150?u=user11.jpg",
-  "https://i.pravatar.cc/150?u=user13.jpg",
-  "https://i.pravatar.cc/150?u=user14.jpg",
-  "https://i.pravatar.cc/150?u=user15.jpg",
-  "https://i.pravatar.cc/150?u=user16.jpg",
-  "https://i.pravatar.cc/150?u=user17.jpg",
-  "https://i.pravatar.cc/150?u=user18.jpg",
-  "https://i.pravatar.cc/150?u=user19.jpg",
+  { key: "avatar_1.png", source: require("./assets/avatar_1.png") },
+  { key: "avatar_2.png", source: require("./assets/avatar_2.png") },
+  { key: "avatar_3.png", source: require("./assets/avatar_3.png") },
+  { key: "avatar_4.png", source: require("./assets/avatar_4.png") },
 ];
 
 export default function LoginScreen() {
@@ -124,10 +110,15 @@ export default function LoginScreen() {
     setError(null);
     setLoading(true);
     try {
+      const formData = new FormData();
+      formData.append("email", email);
+      formData.append("password", password);
+      formData.append("name", name);
+      formData.append("avatar_key", avatar);
+
       const res = await fetch(`${BASE_URL}/api/auth/register`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, name, avatar_url: avatar }),
+        body: formData,
       });
       const data = await res.json();
       if (!res.ok) {
@@ -218,13 +209,13 @@ export default function LoginScreen() {
                 <>
                   <Text style={styles.avatarLabel}>Choose an avatar</Text>
                   <View style={styles.avatarGrid}>
-                    {AVATARS.map((url) => (
+                    {AVATARS.map((item) => (
                       <TouchableOpacity
-                        key={url}
-                        onPress={() => setAvatar(url)}
-                        style={[styles.avatarWrapper, avatar === url && styles.avatarSelected]}
+                        key={item.key}
+                        onPress={() => setAvatar(item.key)}
+                        style={[styles.avatarWrapper, avatar === item.key && styles.avatarSelected]}
                       >
-                        <Image source={{ uri: url }} style={styles.avatarImg} />
+                        <Image source={item.source} style={styles.avatarImg} />
                       </TouchableOpacity>
                     ))}
                   </View>

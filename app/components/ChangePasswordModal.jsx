@@ -1,3 +1,4 @@
+import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Button, Modal, Portal, Text, TextInput, useTheme } from "react-native-paper";
 import { useUserContext } from "../context/UserContext";
@@ -5,8 +6,9 @@ import { useUserContext } from "../context/UserContext";
 const BASE_URL = "https://xp75-be.onrender.com";
 
 export default function ChangePasswordModal({ visible, onDismiss }) {
-  const { accessToken } = useUserContext();
+  const { accessToken, logout } = useUserContext();
   const theme = useTheme();
+  const router = useRouter();
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -35,9 +37,9 @@ export default function ChangePasswordModal({ visible, onDismiss }) {
         setError(data.message || "Failed to change password");
         return;
       }
-      setSuccess("Password changed ✓");
-      setCurrentPassword("");
-      setNewPassword("");
+      onDismiss();
+      logout();
+      router.replace("/");
     } catch {
       setError("Could not reach the server");
     } finally {
