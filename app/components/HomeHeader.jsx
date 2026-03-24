@@ -15,6 +15,7 @@ export default function HomeHeader({ user, onPressLogin }) {
           <Text style={styles.loginBtnText}>Login</Text>
         )}
       </TouchableOpacity>
+      <Image source={require("../assets/logo.jpg")} style={styles.logo} />
     </View>
   );
 }
@@ -25,7 +26,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 20,
-    paddingTop: 52,
+    paddingTop: 8,
     paddingBottom: 12,
   },
   loginBtn: {
@@ -49,5 +50,10 @@ const styles = StyleSheet.create({
     fontSize: fontSizes.base,
     fontWeight: fontWeights.semibold,
     letterSpacing: 0.4,
+  },
+  logo: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
   },
 });

@@ -21,11 +21,12 @@ export default function Social() {
         contentContainerStyle={{ paddingBottom: 40 }}
       >
         <View style={styles.headerRow}>
-          <Image source={require("../assets/trophy.png")} style={styles.headerIcon} />
-          <View style={styles.headerText}>
+          <View style={styles.titleGroup}>
+            <Image source={require("../assets/trophy.png")} style={styles.headerIcon} />
             <Text style={styles.title}>Global Rankings</Text>
-            <Text style={styles.subtitle}>Real-time community progress</Text>
           </View>
+
+          <Image source={require("../assets/logo.jpg")} style={styles.appLogo} />
         </View>
 
         <View style={styles.section}>
@@ -35,10 +36,12 @@ export default function Social() {
         </View>
 
         <View style={[styles.headerRow, { marginTop: 32 }]}>
-          <Image source={require("../assets/groups.png")} style={styles.headerIcon} />
-          <View style={styles.headerText}>
-            <Text style={styles.sectionTitle}>Suggested Groups</Text>
-            <Text style={styles.hint}>Find a group with similar interests to stay on track</Text>
+          <View style={styles.titleGroup}>
+            <Image source={require("../assets/groups.png")} style={styles.headerIcon} />
+            <View>
+              <Text style={styles.sectionTitle}>Suggested Groups</Text>
+              <Text style={styles.hint}>Join a community that fits you</Text>
+            </View>
           </View>
         </View>
 
@@ -64,22 +67,28 @@ const styles = StyleSheet.create({
   },
   headerRow: {
     flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 20,
-    marginTop: 20,
+    marginTop: 8,
     marginBottom: 16,
     gap: 12,
   },
+  titleGroup: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
   headerIcon: {
-    width: 50,
-    height: 50,
+    width: 44,
+    height: 44,
     borderRadius: 10,
   },
   headerText: {
     flex: 1,
   },
   title: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: "800",
     color: "#1A1A2E",
   },
@@ -100,5 +109,10 @@ const styles = StyleSheet.create({
   },
   section: {
     paddingHorizontal: 20,
+  },
+  appLogo: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
   },
 });

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ScrollView, View } from "react-native";
+import { Image, ScrollView, StyleSheet, View } from "react-native";
 import { ActivityIndicator, Text, useTheme } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AISummaries from "../components/AISummaries";
@@ -91,12 +91,16 @@ export default function Profile() {
         contentContainerStyle={{ padding: 20, gap: 16 }}
         showsVerticalScrollIndicator={false}
       >
-        <Text
-          variant="headlineMedium"
-          style={{ color: theme.colors.onBackground, fontWeight: "700" }}
-        >
-          Profile
-        </Text>
+        <View style={styles.headerRow}>
+          <Text
+            variant="headlineMedium"
+            style={{ color: theme.colors.onBackground, fontWeight: "700" }}
+          >
+            Profile
+          </Text>
+
+          <Image source={require("../assets/logo.jpg")} style={styles.logo} />
+        </View>
 
         <ProfileCard
           onEditPress={() => setEditModalVisible(true)}
@@ -113,3 +117,18 @@ export default function Profile() {
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  headerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
+    paddingTop: 8,
+  },
+  logo: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+  },
+});
